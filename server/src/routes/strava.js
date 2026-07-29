@@ -5,7 +5,7 @@ import { saveToken, getLatestToken, saveActivities, getAllStoredActivities, getA
 
 const router = Router();
 
-let frontendOrigin = 'http://localhost:5173';
+let frontendOrigin = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 router.get('/url', (req, res) => {
   const origin = req.headers.origin || req.headers.referer;

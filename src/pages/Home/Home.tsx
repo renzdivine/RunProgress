@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Activity, Gauge, TrendingUp, Footprints, MapPin, BarChart3, ArrowRight,
-  Clock, Users, Star, Zap, Shield, Smartphone, ChevronLeft, ChevronRight
+  Clock, Users, Star, Shield, Smartphone, ChevronLeft, ChevronRight
 } from 'lucide-react'
 import AnimatedBackground from '../../components/ui/AnimatedBackground'
 import {
