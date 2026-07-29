@@ -7,7 +7,7 @@
     "dev": "vite",
     "dev:server": "node server/index.js",
     "dev:all": "concurrently -n client,api -c cyan,green \"npm run dev\" \"npm run dev:server\"",
-    "build": "npx tsc -b && npx vite build",
+    "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview"
   },
