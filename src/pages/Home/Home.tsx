@@ -11,6 +11,7 @@ import {
 } from '../../components/lightswind/3d-scroll-trigger'
 import { SlidingLogoMarquee, type SlidingLogoMarqueeItem } from '../../components/lightswind/sliding-logo-marquee'
 import { isAuthenticated } from '../../services/strava'
+import { getStravaAuthUrl } from '../../services/api'
 import './Home.css'
 
 const heroFeatures = [
@@ -109,19 +110,12 @@ const partnerLogos: SlidingLogoMarqueeItem[] = [
 ]
 
 function redirectStrava() {
-  fetch('/api/url')
-    .then(r => {
-      const contentType = r.headers.get('content-type') || ''
-      if (!contentType.includes('application/json')) {
-        throw new Error('API server is not running')
-      }
-      return r.json()
-    })
-    .then(d => {
-      if (d.url) window.location.href = d.url
+  getStravaAuthUrl()
+    .then(url => {
+      if (url) window.location.href = url
     })
     .catch(() => {
-      alert('Could not connect to the server. Please ensure the API server is running on port 3001.')
+      alert('Could not connect to the server. Please ensure the API server is running.')
     })
 }
 

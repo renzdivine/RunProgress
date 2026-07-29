@@ -12,7 +12,10 @@ router.get('/url', (req, res) => {
   if (origin) {
     try { frontendOrigin = new URL(origin).origin; } catch { /* ignore */ }
   }
-  const redirectUri = `${frontendOrigin}/api/auth/callback`;
+  const deepLink = req.query.deep_link === '1';
+  const redirectUri = deepLink
+    ? `${process.env.SERVER_URL || req.headers.origin || 'http://localhost:3001'}/api/auth/callback`
+    : `${frontendOrigin}/api/auth/callback`;
   res.json({ url: getAuthUrl(CLIENT_ID, redirectUri) });
 });
 
@@ -24,8 +27,19 @@ router.get('/auth/callback', async (req, res) => {
     const data = await exchangeCode(CLIENT_ID, CLIENT_SECRET, code);
     saveToken(data.access_token, data.athlete?.id || '');
     const athleteId = data.athlete?.id || '';
-    res.redirect(`${frontendOrigin}/dashboard?strava_auth=success&token=${data.access_token}&athlete=${athleteId}`);
+    const token = data.access_token;
+
+    const deepLinkRedirect = process.env.DEEP_LINK_URL;
+    if (deepLinkRedirect) {
+      return res.redirect(`${deepLinkRedirect}/dashboard?strava_auth=success&token=${token}&athlete=${athleteId}`);
+    }
+
+    res.redirect(`${frontendOrigin}/dashboard?strava_auth=success&token=${token}&athlete=${athleteId}`);
   } catch {
+    const deepLinkRedirect = process.env.DEEP_LINK_URL;
+    if (deepLinkRedirect) {
+      return res.redirect(`${deepLinkRedirect}/dashboard?strava_auth=error`);
+    }
     res.redirect(`${frontendOrigin}/dashboard?strava_auth=error`);
   }
 });

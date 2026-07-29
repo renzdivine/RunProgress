@@ -2,6 +2,7 @@ import { Activity, X, LayoutDashboard, List, Grid3X3, LogOut } from 'lucide-reac
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { isAuthenticated, logout } from '../../services/strava'
+import { getStravaAuthUrl } from '../../services/api'
 
 const authedLinks = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -57,7 +58,7 @@ export default function Navbar() {
             {authed ? (
               <button className="btn-strava" onClick={() => setShowLogoutConfirm(true)}>Logout</button>
             ) : (
-              <button className="btn-strava" onClick={() => { fetch('/api/url').then(r => r.json()).then(d => { if (d.url) window.location.href = d.url }).catch(() => { alert('Could not connect to the server. Please ensure the API server is running.') }) }}>Login with Strava</button>
+              <button className="btn-strava" onClick={() => { getStravaAuthUrl().then(url => { if (url) window.location.href = url }).catch(() => { alert('Could not connect to the server. Please ensure the API server is running.') }) }}>Login with Strava</button>
             )}
           </div>
 
