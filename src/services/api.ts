@@ -1,5 +1,10 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
 
+function authHeaders(): Record<string, string> {
+  const token = localStorage.getItem('strava_token')
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
+
 export interface ParsedActivity {
   name: string
   distance: number
@@ -23,7 +28,7 @@ export function getStravaAuthUrl(): Promise<string> {
 export async function parseStravaUrl(url: string): Promise<ParsedActivity> {
   const res = await fetch(`${API_BASE_URL}/api/parse`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
     body: JSON.stringify({ url }),
   })
   const json = await res.json()
@@ -32,7 +37,10 @@ export async function parseStravaUrl(url: string): Promise<ParsedActivity> {
 }
 
 export async function importAllActivities(): Promise<ParsedActivity[]> {
-  const res = await fetch(`${API_BASE_URL}/api/import`, { method: 'POST' })
+  const res = await fetch(`${API_BASE_URL}/api/import`, {
+    method: 'POST',
+    headers: { ...authHeaders() },
+  })
   const json = await res.json()
   if (!res.ok || !json.success) throw new Error(json.error || 'Failed to import activities')
   return json.activities as ParsedActivity[]

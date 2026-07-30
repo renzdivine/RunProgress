@@ -1,11 +1,19 @@
 import { Router } from 'express';
 import { CLIENT_ID, CLIENT_SECRET } from '../config.js';
 import { getAuthUrl, exchangeCode, getActivity, getAllActivities } from '../services/strava.js';
-import { saveToken, getLatestToken, saveActivities, getAllStoredActivities, getActivityByStravaId } from '../db.js';
+import { saveToken, getLatestToken, saveActivities, getAllStoredActivities, getActivityByStravaId } from '../store.js';
 
 const router = Router();
 
 let frontendOrigin = process.env.FRONTEND_URL || 'http://localhost:5173';
+
+function resolveToken(req) {
+  const auth = req.headers.authorization
+  if (auth?.startsWith('Bearer ')) {
+    return { access_token: auth.slice(7) }
+  }
+  return getLatestToken()
+}
 
 router.get('/url', (req, res) => {
   const origin = req.headers.origin || req.headers.referer;
@@ -48,7 +56,7 @@ router.get('/activities/:id', async (req, res) => {
   const cached = getActivityByStravaId(parseInt(req.params.id));
   if (cached) return res.json({ success: true, data: cached, cached: true });
 
-  const token = getLatestToken();
+  const token = resolveToken(req);
   if (!token) return res.status(401).json({ error: 'Not connected to Strava' });
 
   try {
@@ -79,7 +87,7 @@ router.post('/parse', async (req, res) => {
   const cached = getActivityByStravaId(activityId);
   if (cached) return res.json({ success: true, data: cached, cached: true });
 
-  const token = getLatestToken();
+  const token = resolveToken(req);
   if (!token) return res.status(401).json({ error: 'Not connected to Strava. Click "Connect Strava" first.' });
 
   try {
@@ -98,8 +106,8 @@ router.post('/parse', async (req, res) => {
   }
 });
 
-router.post('/import', async (_req, res) => {
-  const token = getLatestToken();
+router.post('/import', async (req, res) => {
+  const token = resolveToken(req);
   if (!token) return res.status(401).json({ error: 'Not connected to Strava' });
 
   try {
