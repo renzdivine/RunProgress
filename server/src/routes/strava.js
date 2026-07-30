@@ -16,9 +16,13 @@ function resolveToken(req) {
 }
 
 router.get('/url', (req, res) => {
-  const origin = req.headers.origin || req.headers.referer;
-  if (origin) {
-    try { frontendOrigin = new URL(origin).origin; } catch { /* ignore */ }
+  if (process.env.FRONTEND_URL) {
+    frontendOrigin = process.env.FRONTEND_URL;
+  } else {
+    const origin = req.headers.origin || req.headers.referer;
+    if (origin) {
+      try { frontendOrigin = new URL(origin).origin; } catch { /* ignore */ }
+    }
   }
   const deepLink = req.query.deep_link === '1';
   const redirectUri = deepLink
